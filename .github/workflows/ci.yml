@@ -9,21 +9,24 @@ on:
 jobs:
 
   backend:
-    name: Backend (Spring Boot)
+    name: Backend (Spring Boot + Selenium)
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: backend
     steps:
+      # 1️⃣ Checkout the code
       - name: Checkout
         uses: actions/checkout@v4
 
+      # 2️⃣ Set up Java
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
+      # 3️⃣ Cache Maven dependencies
       - name: Cache Maven repository
         uses: actions/cache@v4
         with:
@@ -31,12 +34,17 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
 
+      # 4️⃣ Install Google Chrome (required for Selenium UI tests)
+      - name: Install Google Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      # 5️⃣ Build and run tests (unit + Selenium)
       - name: Build & run tests (Maven)
         run: mvn -B clean verify
 
-        # If your backend uses Gradle instead, replace the above with:
-        # run: ./gradlew --no-daemon clean build
-
+      # 6️⃣ Upload backend artifacts
       - name: Upload backend artifacts (jar + test reports)
         uses: actions/upload-artifact@v4
         with:
@@ -44,7 +52,7 @@ jobs:
           path: |
             target/*.jar
             target/surefire-reports/**/*.xml
-            build/libs/*.jar    # gradle output (if using gradle)
+            build/libs/*.jar  # in case you use Gradle
 
   frontend:
     name: Frontend (React)
@@ -53,32 +61,41 @@ jobs:
       run:
         working-directory: frontend
     steps:
+      # 1️⃣ Checkout the code
       - name: Checkout
         uses: actions/checkout@v4
 
+      # 2️⃣ Set up Node.js
       - name: Use Node 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
+      # 3️⃣ Cache npm
       - name: Cache npm
         uses: actions/cache@v4
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: ${{ runner.os }}-node-
+
+      # 4️⃣ Clean npm cache (optional but safer)
       - name: Clean npm cache
         run: npm cache clean --force
 
+      # 5️⃣ Install dependencies
       - name: Install dependencies
         run: npm install
 
+      # 6️⃣ Run unit tests
       - name: Run unit tests
         run: npm test -- --watchAll=false
 
+      # 7️⃣ Build frontend
       - name: Build
         run: npm run build
 
+      # 8️⃣ Upload frontend build
       - name: Upload frontend build
         uses: actions/upload-artifact@v4
         with:
