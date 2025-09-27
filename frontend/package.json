@@ -9,7 +9,6 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "react-scripts test"
-
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.13",
@@ -27,6 +26,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.4.0",
+    "react-scripts": "^5.0.1",
     "vite": "^7.1.7"
   }
 }
