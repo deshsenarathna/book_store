@@ -50,13 +50,7 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
 
-      # 4️⃣ Wait for MySQL to be ready
-      - name: Wait for MySQL
-        run: |
-          until mysqladmin ping -h "127.0.0.1" -P 3306 --silent; do
-            echo "Waiting for MySQL..."
-            sleep 5
-          done
+    
 
       # 5️⃣ Install Google Chrome (required for Selenium UI tests)
       - name: Install Google Chrome
