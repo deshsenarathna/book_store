@@ -35,7 +35,7 @@ public class AddBookUITest {
         this.driver = new ChromeDriver(options);
 
         // Open the web app
-        this.driver.get("http://localhost:5175");
+        this.driver.get("http://localhost:5173");
     }
 
     @Test

@@ -7,29 +7,14 @@ on:
     branches: [ main ]
 
 jobs:
-
   backend:
-    name: Backend (Spring Boot + Selenium)
+    name: Backend (Spring Boot + Selenium + H2)
     runs-on: ubuntu-latest
-    services:
-      mysql:
-        image: mysql:8
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: bookstore
-          MYSQL_USER: user
-          MYSQL_PASSWORD: userpassword
-        ports:
-          - 3307:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h localhost -proot"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
 
     defaults:
       run:
         working-directory: backend
+
     steps:
       # 1️⃣ Checkout the code
       - name: Checkout
@@ -50,19 +35,35 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
 
-    
-
-      # 5️⃣ Install Google Chrome (required for Selenium UI tests)
-      - name: Install Google Chrome
+      # 4️⃣ Install Google Chrome & ChromeDriver (required for Selenium UI tests)
+      - name: Install Google Chrome & ChromeDriver
         run: |
           sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
+          sudo apt-get install -y google-chrome-stable chromium-chromedriver
 
-      # 6️⃣ Build and run tests (unit + Selenium)
+      # 🟢 Set up Node for frontend
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      # 🟢 Build & serve frontend on 5173 (your port)
+      - name: Build & serve frontend on 5173
+        working-directory: ./frontend
+        run: |
+          npm ci
+          npm run build
+          # serve the static build on port 5173 in the background
+          npx serve -s build -l 5173 &
+
+      - name: Wait for frontend
+        run: sleep 5
+
+      # 5️⃣ Build and run tests (unit + Selenium)
       - name: Build & run tests (Maven)
         run: mvn -B clean verify
 
-      # 7️⃣ Upload backend artifacts
+      # 6️⃣ Upload backend artifacts
       - name: Upload backend artifacts (jar + test reports)
         uses: actions/upload-artifact@v4
         with:
