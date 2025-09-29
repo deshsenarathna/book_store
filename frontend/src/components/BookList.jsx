@@ -20,21 +20,18 @@ export default function BookList({ trigger, onNavigateToForm }) {
       const res = await getBooks();
       console.log('Books fetched successfully:', res.data);
       setBooks(res.data || []); // ✅ actual data from backend
-    } catch (err) {
-      console.error('Error loading books:', err);
-      
-      // Determine the specific error type
+    } catch (e) {
+      console.error('Error loading books:', e);
       let errorMessage = 'Failed to load books from API. ';
-      if (err.code === 'ERR_NETWORK' || err.message.includes('Network Error')) {
+      if (e.code === 'ERR_NETWORK' || (e.message && e.message.includes('Network Error'))) {
         errorMessage += 'Backend server appears to be offline. Please start the backend server on http://localhost:8080';
-      } else if (err.response) {
-        errorMessage += `Server responded with error ${err.response.status}: ${err.response.data?.message || err.response.statusText}`;
+      } else if (e.response) {
+        errorMessage += `Server responded with error ${e.response.status}: ${e.response.data?.message || e.response.statusText}`;
       } else {
-        errorMessage += `${err.message}. Please check if the backend server is running.`;
+        errorMessage += `${e.message}. Please check if the backend server is running.`;
       }
-      
       setError(errorMessage);
-      setBooks([]); // Set empty array instead of undefined dummyBooks
+      setBooks([]);
     } finally {
       setLoading(false);
     }
@@ -48,8 +45,7 @@ export default function BookList({ trigger, onNavigateToForm }) {
     try {
       await deleteBook(id);
       loadBooks();
-    } catch (err) {
-      // fallback: remove locally
+    } catch (e) {
       setBooks(books.filter(book => book.id !== id));
     }
   };
@@ -82,13 +78,8 @@ export default function BookList({ trigger, onNavigateToForm }) {
       });
       cancelEdit();
       loadBooks();
-    } catch (err) {
-      // fallback: update locally
-      setBooks(books.map(book =>
-        book.id === id
-          ? { ...book, title: editTitle, author: editAuthor, price: parseFloat(editPrice) }
-          : book
-      ));
+    } catch (e) {
+      setBooks(books.map(book => book.id === id ? { ...book, title: editTitle, author: editAuthor, price: parseFloat(editPrice) } : book));
       cancelEdit();
     }
   };
