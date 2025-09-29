@@ -41,19 +41,26 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable chromium-chromedriver
 
-      # 🟢 Set up Node for frontend
-      - name: Setup Node
+      # 🟢 Set up Node for frontend build
+      - name: Setup Node 22
         uses: actions/setup-node@v4
         with:
-          node-version: 
+          node-version: '22'
 
-      # 🟢 Build & serve frontend on 5173 (your port)
+      # 🟢 Cache npm for frontend
+      - name: Cache npm (frontend)
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+
+      # 🟢 Build & serve frontend on 5173
       - name: Build & serve frontend on 5173
         working-directory: ./frontend
         run: |
           npm ci
           npm run build
-          # serve the static build on port 5173 in the background
           npx serve -s build -l 5173 &
 
       - name: Wait for frontend
@@ -71,6 +78,54 @@ jobs:
           path: |
             target/*.jar
             target/surefire-reports/**/*.xml
-            build/libs/*.jar  # in case you use Gradle
+            build/libs/*.jar
 
-  
+  frontend:
+    name: Frontend (React)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      # 1️⃣ Checkout the code
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2️⃣ Set up Node.js (same as local)
+      - name: Use Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # 3️⃣ Cache npm
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+
+      # 4️⃣ Clean npm cache to avoid stale state
+      - name: Clean npm cache
+        run: npm cache clean --force
+
+      # 5️⃣ Install dependencies (use npm ci for lockfile)
+      - name: Install dependencies
+        run: npm ci
+
+      # 6️⃣ Run unit tests
+      - name: Run unit tests
+        run: npm test -- --watchAll=false
+
+      # 7️⃣ Build frontend
+      - name: Build frontend
+        run: npm run build
+
+      # 8️⃣ Upload frontend build
+      - name: Upload frontend build
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: build
