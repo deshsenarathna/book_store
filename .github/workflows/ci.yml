@@ -45,7 +45,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       # 🟢 Build & serve frontend on 5173 (your port)
       - name: Build & serve frontend on 5173
