@@ -113,7 +113,7 @@ jobs:
 
       # 5️⃣ Install dependencies (use npm ci for lockfile)
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       # 6️⃣ Run unit tests
       - name: Run unit tests
