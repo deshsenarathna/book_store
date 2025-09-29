@@ -45,7 +45,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 
 
       # 🟢 Build & serve frontend on 5173 (your port)
       - name: Build & serve frontend on 5173
@@ -73,50 +73,4 @@ jobs:
             target/surefire-reports/**/*.xml
             build/libs/*.jar  # in case you use Gradle
 
-  frontend:
-    name: Frontend (React)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
-    steps:
-      # 1️⃣ Checkout the code
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      # 2️⃣ Set up Node.js
-      - name: Use Node 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      # 3️⃣ Cache npm
-      - name: Cache npm
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: ${{ runner.os }}-node-
-
-      # 4️⃣ Clean npm cache
-      - name: Clean npm cache
-        run: npm cache clean --force
-
-      # 5️⃣ Install dependencies
-      - name: Install dependencies
-        run: npm install
-
-      # 6️⃣ Run unit tests
-      - name: Run unit tests
-        run: npm test -- --watchAll=false
-
-      # 7️⃣ Build frontend
-      - name: Build
-        run: npm run build
-
-      # 8️⃣ Upload frontend build
-      - name: Upload frontend build
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-build
-          path: build
+  
