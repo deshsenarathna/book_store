@@ -28,5 +28,10 @@
     "globals": "^16.4.0",
     "react-scripts": "^5.0.1",
     "vite": "^7.1.7"
-  }
+  },
+  "overrides": {
+  "ajv": "8.17.1",
+  "rollup": "2.79.2"
+}
+
 }
