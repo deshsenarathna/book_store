@@ -130,7 +130,4 @@ jobs:
           name: frontend-build
           path: build
 
-       - name: Clear npm cache completely
-           run: |
-           rm -rf node_modules package-lock.json
-           npm cache clean --force
+          
