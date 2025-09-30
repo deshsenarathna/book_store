@@ -1,4 +1,4 @@
-name: CI - build & test
+name: Backend CI - Build & Test
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   backend:
-    name: Backend (Spring Boot + Selenium + H2)
+    name: Backend (Spring Boot + Tests)
     runs-on: ubuntu-latest
 
     defaults:
@@ -17,7 +17,7 @@ jobs:
 
     steps:
       # 1️⃣ Checkout the code
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       # 2️⃣ Set up Java
@@ -28,57 +28,38 @@ jobs:
           java-version: '17'
 
       # 3️⃣ Cache Maven dependencies
-      - name: Cache Maven repository
+      - name: Cache Maven dependencies
         uses: actions/cache@v4
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          key: ${{ runner.os }}-maven-${{ hashFiles('backend/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
 
-      # 4️⃣ Install Google Chrome & ChromeDriver (required for Selenium UI tests)
-      - name: Install Google Chrome & ChromeDriver
+      # 4️⃣ Install Chrome for Selenium tests (if needed)
+      - name: Install Google Chrome
         run: |
           sudo apt-get update
-          sudo apt-get install -y google-chrome-stable chromium-chromedriver
+          sudo apt-get install -y google-chrome-stable
 
-      # 🟢 Set up Node for frontend build
-      - name: Setup Node 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      # 🟢 Cache npm for frontend
-      - name: Cache npm (frontend)
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('frontend/package-lock.json') }}
-          restore-keys: ${{ runner.os }}-node-
-
-      # 🟢 Build & serve frontend on 5173
-      - name: Build & serve frontend on 5173
-        working-directory: ./frontend
-        run: |
-          npm ci
-          npm run build
-          npx serve -s build -l 5173 &
-
-      - name: Wait for frontend
-        run: sleep 5
-
-      # 5️⃣ Build and run tests (unit + Selenium)
-      - name: Build & run tests (Maven)
+      # 5️⃣ Build and run all tests
+      - name: Build and test with Maven
         run: mvn -B clean verify
 
-      # 6️⃣ Upload backend artifacts
-      - name: Upload backend artifacts (jar + test reports)
+      # 6️⃣ Upload test reports
+      - name: Upload test reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: backend-artifacts
-          path: |
-            target/*.jar
-            target/surefire-reports/**/*.xml
-            build/libs/*.jar
+          name: test-reports
+          path: backend/target/surefire-reports/
+
+      # 7️⃣ Upload JAR artifact
+      - name: Upload JAR artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: backend/target/*.jar
 
   
 
