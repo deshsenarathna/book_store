@@ -8,6 +8,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -24,8 +25,17 @@ public class DeleteBookUITest {
     @BeforeEach
     public void setup() {
         WebDriverManager.chromedriver().setup();
-        driver = new ChromeDriver();
-        driver.manage().window().maximize();
+        
+        // Configure ChromeOptions for CI/headless mode
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--headless=new"); // headless mode
+        options.addArguments("--no-sandbox"); 
+        options.addArguments("--disable-dev-shm-usage"); 
+        options.addArguments("--disable-gpu");
+        options.addArguments("--remote-allow-origins=*");
+        options.addArguments("--user-data-dir=/tmp/unique-dir-" + java.util.UUID.randomUUID());
+        
+        driver = new ChromeDriver(options);
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
         wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
