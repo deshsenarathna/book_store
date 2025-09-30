@@ -47,11 +47,11 @@ jobs:
           export DISPLAY=:99
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
 
-      # 6️⃣ Build and run tests (skipping UI tests - no frontend available)
+      # 6️⃣ Build and run tests (excluding Selenium UI tests)
       - name: Build and test with Maven
         env:
           DISPLAY: :99
-        run: mvn -B clean test -Dspring.profiles.active=test -Dtest='!**selenium**'
+        run: mvn -B clean test -Dspring.profiles.active=test -Pci
 
       # 7️⃣ Upload test reports
       - name: Upload test reports
