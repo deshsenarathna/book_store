@@ -35,31 +35,17 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('backend/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
 
-      # 4️⃣ Set up Node.js for frontend
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
-      # 5️⃣ Install Chrome for Selenium tests (if needed)
+      # 4️⃣ Install Chrome for Selenium tests (if needed)
       - name: Install Google Chrome
         run: |
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
 
-      # 6️⃣ Start frontend
-      - name: Start frontend
-        run: |
-          cd frontend
-          npm install
-          npm run dev &
-          sleep 10  # Give server time to start
-
-      # 7️⃣ Build and run all tests
+      # 5️⃣ Build and run all tests
       - name: Build and test with Maven
         run: mvn -B clean verify
 
-      # 8️⃣ Upload test reports
+      # 6️⃣ Upload test reports
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -67,7 +53,7 @@ jobs:
           name: test-reports
           path: backend/target/surefire-reports/
 
-      # 9️⃣ Upload JAR artifact
+      # 7️⃣ Upload JAR artifact
       - name: Upload JAR artifact
         if: success()
         uses: actions/upload-artifact@v4
